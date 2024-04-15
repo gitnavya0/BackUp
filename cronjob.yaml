@@ -1,0 +1,29 @@
+#orignal one that creates, runs and terminates new pods every 2 minutes 
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-to-google-drive
+spec:
+  schedule: "*/2 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup-to-google-drive
+            image: pes1ug21cs368/back-up-repo:latest
+            volumeMounts:
+            - name: google-credentials
+              mountPath: /app/service-account.json
+              subPath: service-account.json
+            - name: uploads-volume
+              mountPath: /app/uploads
+          volumes:
+          - name: google-credentials
+            secret:
+              secretName: google-credentials
+          - name: uploads-volume
+            persistentVolumeClaim:
+              claimName: uploads-pvc
+          restartPolicy: OnFailure
+
